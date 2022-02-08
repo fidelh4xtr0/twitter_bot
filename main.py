@@ -205,7 +205,9 @@ class Tweet:
     
 def main():
     global reply
-    text = open('Documents/Coding Projects/Python/blackshirtsbot/quotes.txt','r')
+    dirname = os.path.dirname(__file__)
+    filename = os.path.join(dirname, 'quotes.txt')
+    text = open(filename,'r')
     
     txt = text.read()
     count=0
