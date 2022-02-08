@@ -35,7 +35,9 @@ class Tweet:
 # expansions,tweet.fields,media.fields,poll.fields,place.fields,user.fields
 
     def get_credentials(self):
-        cred_file = open('/Users/pnovoa/Documents/Coding Projects/Python/blackshirtsbot/creds','r')
+        dirname = os.path.dirname(__file__)
+        filename = os.path.join(dirname, 'creds')
+        cred_file = open(filename,'r')
         creds = []
         for line in cred_file.readlines():
             creds.append(line.strip("\n").split("="))
