@@ -42,13 +42,13 @@ class Tweet:
         for line in cred_file.readlines():
             creds.append(line.strip("\n").split("="))
             
-        return creds[0],creds[1],creds[2],creds[3],creds[4]
+        return creds[0],creds[1],creds[2],creds[3],creds[4],creds[5]
         
 
     def create_url(self,check_type):
     # Replace with user ID below
         if check_type == "mentions":
-            user_id = 1490921395680854017
+            user_id = self.get_credentials()[5][1]
             return "https://api.twitter.com/2/users/{}/mentions".format(user_id)
         elif check_type == "anti-authoritarians":
             return "https://api.twitter.com/2/tweets/search/recent"
@@ -97,7 +97,7 @@ class Tweet:
             print(p)
             if post.index(p) == 0:
                 if reply:
-                    client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
+                    #client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
                     continue
                 else:
                     client.create_tweet(text=p)
@@ -105,8 +105,9 @@ class Tweet:
             elif post.index(p) < len(p):
                 time.sleep(20)
                 tweet_text = post[post.index(p)-1]
-                query_params = {'query': f'from:reds_bot"{tweet_text}"','tweet.fields': 'author_id'}
-                tweet_id = self.get_tweet_id(query_params)["data"][0]["id"]
+                query_params = {'query': f'from:{self.get_credentials()[6][1]}"{tweet_text}"','tweet.fields': 'author_id'}
+                print(query_params)
+                #tweet_id = self.get_tweet_id(query_params)["data"][0]["id"]
                 client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
     
     
