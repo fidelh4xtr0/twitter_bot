@@ -97,7 +97,7 @@ class Tweet:
             print(p)
             if post.index(p) == 0:
                 if reply:
-                    #client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
+                    client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
                     continue
                 else:
                     client.create_tweet(text=p)
@@ -106,8 +106,7 @@ class Tweet:
                 time.sleep(20)
                 tweet_text = post[post.index(p)-1]
                 query_params = {'query': f'from:{self.get_credentials()[6][1]}"{tweet_text}"','tweet.fields': 'author_id'}
-                print(query_params)
-                #tweet_id = self.get_tweet_id(query_params)["data"][0]["id"]
+                tweet_id = self.get_tweet_id(query_params)["data"][0]["id"]
                 client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
     
     
