@@ -42,7 +42,7 @@ class Tweet:
         for line in cred_file.readlines():
             creds.append(line.strip("\n").split("="))
             
-        return creds[0],creds[1],creds[2],creds[3],creds[4],creds[5]
+        return creds[0],creds[1],creds[2],creds[3],creds[4],creds[5],creds[6]
         
 
     def create_url(self,check_type):
