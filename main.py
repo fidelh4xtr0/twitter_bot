@@ -211,7 +211,7 @@ def main():
     
     txt = text.read()
     count=0
-    for quote in txt.split('"'):
+    for quote in txt.split("'"):
         if len(quote)<3:
             continue
         else:
