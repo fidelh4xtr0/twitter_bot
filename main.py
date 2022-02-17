@@ -13,7 +13,7 @@ from dateutil import parser
 
 
 search_url = "https://api.twitter.com/2/tweets/search/recent"
-bot_ids = ['1494138013726564355','1494138012317327361','1494138011855904768','1494136728516321283','1494135812941918210','1494274595624349698']
+bot_ids = ['1434306349417082884','1428910863231168517']
 
 quotes = []
 
@@ -32,8 +32,25 @@ class Tweet:
         self.access_token_secret = self.get_credentials()[4][1]
         
 
-# Optional params: start_time,end_time,since_id,until_id,max_results,next_token,
-# expansions,tweet.fields,media.fields,poll.fields,place.fields,user.fields
+    #Authentication Functions
+
+
+    def bearer_oauth(self,r):
+        global option
+        """
+        Method required by bearer token authentication.çc
+        """
+
+        r.headers["Authorization"] = f"Bearer {self.bearer}"
+        if option == 0:
+            r.headers["User-Agent"] = "v2UserMentionsPython"
+        elif option == 1:
+            r.headers["User-Agent"] = "v2RecentSearchPython"
+        elif option == 2:
+            r.headers["User-Agent"] = "v2TweetLookupPython"
+        elif option == 3:
+           r.headers["User-Agent"] = "v2UserLookupPython"
+        return r
 
     def get_credentials(self):
         dirname = os.path.dirname(__file__)
@@ -54,23 +71,8 @@ class Tweet:
         elif check_type == "anti-authoritarians":
             return "https://api.twitter.com/2/tweets/search/recent"
 
+    #Tweet Preparation
 
-    def bearer_oauth(self,r):
-        global option
-        """
-        Method required by bearer token authentication.çc
-        """
-
-        r.headers["Authorization"] = f"Bearer {self.bearer}"
-        if option == 0:
-            r.headers["User-Agent"] = "v2UserMentionsPython"
-        elif option == 1:
-            r.headers["User-Agent"] = "v2RecentSearchPython"
-        elif option == 2:
-            r.headers["User-Agent"] = "v2TweetLookupPython"
-        elif option == 3:
-           r.headers["User-Agent"] = "v2UserLookupPython"
-        return r
 
     def connect_to_endpoint(self, url, params):
         response = requests.get(url, auth=self.bearer_oauth, params=params)
@@ -116,6 +118,12 @@ class Tweet:
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
         return json_object
 
+    def debug(self,json_object):
+        for entry in json_object['data']:
+            if entry['author_id'] not in bot_ids:
+                print(entry['author_id'], entry['text'])
+        
+        exit(0)
         
 
                 
@@ -129,8 +137,7 @@ class Tweet:
         params = self.get_params()
         json_response = self.connect_to_endpoint(url, params)
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
-        print(json_object)
-       #exit(0)
+        #self.debug(json_object)
 
         responses = len(json_object["data"])
         #date_posted = json_object["data"]
