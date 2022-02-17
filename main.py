@@ -130,7 +130,6 @@ class Tweet:
         json_response = self.connect_to_endpoint(url, params)
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
         print(json_object)
-        exit(0)
         responses = len(json_object["data"])
         #date_posted = json_object["data"]
         #print(date_posted)
