@@ -13,7 +13,7 @@ from dateutil import parser
 
 
 search_url = "https://api.twitter.com/2/tweets/search/recent"
-bot_ids = ['1494138013726564355','1494138012317327361','1494138011855904768','1494136728516321283','1494135812941918210']
+bot_ids = ['1494138013726564355','1494138012317327361','1494138011855904768','1494136728516321283','1494135812941918210','1494274595624349698']
 
 quotes = []
 
@@ -130,6 +130,8 @@ class Tweet:
         json_response = self.connect_to_endpoint(url, params)
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
         print(json_object)
+       #exit(0)
+
         responses = len(json_object["data"])
         #date_posted = json_object["data"]
         #print(date_posted)
