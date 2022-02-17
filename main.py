@@ -137,7 +137,7 @@ class Tweet:
         params = self.get_params()
         json_response = self.connect_to_endpoint(url, params)
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
-        #self.debug(json_object)
+        self.debug(json_object)
 
         responses = len(json_object["data"])
         #date_posted = json_object["data"]
@@ -156,7 +156,7 @@ class Tweet:
 
             
             print(minute_diff)
-            if  minute_diff <= 5 and response['id'] not in bot_ids:   
+            if  minute_diff <= 5 and response['author_id'] not in bot_ids:   
                 self.new_tweet(client,response['id'])
         
 
