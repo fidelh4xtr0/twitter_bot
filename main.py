@@ -82,8 +82,8 @@ class Tweet:
         return response.json()
     
     def get_body(self):
-        post = random.choice(quotes)
-
+        post = random.choice(quotes) + " #abolishNATO"
+        self.prevent_repeat(post)
         return post
 
     def prepare_tweet(self):
@@ -137,7 +137,7 @@ class Tweet:
         params = self.get_params()
         json_response = self.connect_to_endpoint(url, params)
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
-        self.debug(json_object)
+        #self.debug(json_object)
 
         responses = len(json_object["data"])
         #date_posted = json_object["data"]
@@ -213,6 +213,21 @@ class Tweet:
         #json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
         #print(json_object)
         
+    def prevent_repeat(self, quote):
+        dirname = os.path.dirname(__file__)
+        filename = os.path.join(dirname, 'used')
+        used = open(filename,'r+')
+        if quote in used:
+            quote = self.prepare_tweet()
+        used.seek(0, os.SEEK_END)
+        used.write(f'^{quote}\n')
+        used.seek(0, os.SEEK_SET)
+        used_raw = used.read()
+        total_quotes = used_raw.split('^')
+        if len(total_quotes) > 15:
+            used.truncate(0)
+        used.close()    
+        
     
 def main():
     global reply
@@ -239,7 +254,6 @@ def main():
     reply = False
    # tweet.new_tweet(client)
     date = datetime.datetime.now()
-    
 
 
     if date.minute == 0:
