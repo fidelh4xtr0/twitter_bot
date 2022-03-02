@@ -13,7 +13,11 @@ from dateutil import parser
 
 
 search_url = "https://api.twitter.com/2/tweets/search/recent"
-bot_ids = ['1434306349417082884','1428910863231168517']
+bot_ids = ['1434306349417082884',
+           '1428910863231168517',
+           '1458651028476375047',
+           '1489202597995200514', 
+           '1490921395680854017']
 
 quotes = []
 
@@ -100,17 +104,29 @@ class Tweet:
             print(p)
             if post.index(p) == 0:
                 if reply:
-                    client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
-                    continue
+                    try:
+                        client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
+                    except Forbidden:
+                        time.sleep(10)
+                        client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
                 else:
-                    client.create_tweet(text=p)
-                    continue
+                    try:
+                        client.create_tweet(text=p)
+                        continue
+                    except Forbidden:    
+                        time.wait(10)
+                        client.create_tweet(text=p)
+                        continue
             elif post.index(p) < len(p):
                 time.sleep(20)
                 tweet_text = post[post.index(p)-1]
                 query_params = {'query': f'from:{self.get_credentials()[6][1]}"{tweet_text}"','tweet.fields': 'author_id'}
                 tweet_id = self.get_tweet_id(query_params)["data"][0]["id"]
-                client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
+                try:
+                    client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
+                except Forbidden:
+                    time.wait(10)
+                    client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
     
     
     def get_tweet_id(self, query):
