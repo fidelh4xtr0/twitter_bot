@@ -113,18 +113,23 @@ class Tweet:
                     try:
                         client.create_tweet(text=p)
                         continue
-                    except Forbidden:    
+                    except:    
                         time.wait(10)
                         client.create_tweet(text=p)
                         continue
             elif post.index(p) < len(p):
                 time.sleep(20)
                 tweet_text = post[post.index(p)-1]
+                if '"' in tweet_text:
+                    if tweet_text.startswith('"'):
+                        tweet_text=tweet_text.split('"')[1]
+                    else:
+                        tweet_text=tweet_text.split('"')[0]
                 query_params = {'query': f'from:{self.get_credentials()[6][1]}"{tweet_text}"','tweet.fields': 'author_id'}
                 tweet_id = self.get_tweet_id(query_params)["data"][0]["id"]
                 try:
                     client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
-                except Forbidden:
+                except:
                     time.wait(10)
                     client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
     
@@ -213,16 +218,17 @@ class Tweet:
         pull_type = "anti-authoritarians"
         url = self.create_url(pull_type)
         params = self.get_params()
-        query_params = {'query': '(authoritarian OR dictator) (Stalin OR Mao OR Lenin OR Xi OR China OR Soviet OR CCP) -is:retweet','tweet.fields': 'author_id','max_results':"50"}
+        query_params = {'query': 'from: anarchistCC','tweet.fields': 'author_id','max_results':"15"}
         #tweet_id = self.get_tweet_id(query_params)
         json_response = self.connect_to_endpoint(url, query_params)
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
         count = 1
         for entry in json_object["data"]:
             #print(f"{entry['id']}: {entry['text']}")
-            if self.is_anarchist(entry):
-                print("We got a live one")
-                client.create_tweet(text="Anti-authoritarian detected: @OnAuthorityBot you know what to do",in_reply_to_tweet_id=entry['id'])        
+            #if self.is_anarchist(entry):
+            print("We got a live one")
+            print(entry)
+            client.create_tweet(text="Go read the scary books, loser",in_reply_to_tweet_id=entry['id'])        
             count+=1
         #url = self.create_url(pull_type)
         #json_response = self.connect_to_endpoint(url, params)
@@ -233,7 +239,7 @@ class Tweet:
         dirname = os.path.dirname(__file__)
         filename = os.path.join(dirname, 'used')
         used = open(filename,'r+')
-        if quote in used:
+        if quote in used.read():
             quote = self.prepare_tweet()
         used.seek(0, os.SEEK_END)
         used.write(f'^{quote}\n')
@@ -272,15 +278,15 @@ def main():
     date = datetime.datetime.now()
 
 
-    if date.minute == 0:
+    if date.minute == 17:
         tweet.new_tweet(client,0)
     elif date.hour == 12 and date.minute==0:
        # tweet.get_anti_authoritarians(client)
        exit(0)
     else:
         print("Let's go check those mentions")
-        tweet.check_mentions(client)
-    
+        #tweet.check_mentions(client)
+        tweet.get_anti_authoritarians(client)
 
 
 if __name__ == "__main__":
