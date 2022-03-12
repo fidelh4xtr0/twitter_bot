@@ -26,7 +26,7 @@ global option
 global reply
 class Tweet:
     def __init__(self):
-        self.max_length = 280
+        self.max_length = 260
             
         # Credentials
         self.api_key = self.get_credentials()[0][1]
@@ -100,22 +100,29 @@ class Tweet:
         global reply
         option = 0
         post = self.prepare_tweet()
+        posts = len(post)
+        count=0
         for p in post:
-            print(p)
+            count+=1
+            if posts > 1:
+                tweet = f'{p} {count}/{posts}'
+            else:
+                tweet = p
+            print(tweet, len(tweet))
             if post.index(p) == 0:
                 if reply:
                     try:
-                        client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
+                        client.create_tweet(text=tweet,in_reply_to_tweet_id=tweet_id)
                     except Forbidden:
                         time.sleep(10)
-                        client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
+                        client.create_tweet(text=tweet,in_reply_to_tweet_id=tweet_id)
                 else:
                     try:
-                        client.create_tweet(text=p)
+                        client.create_tweet(text=tweet)
                         continue
                     except:    
-                        time.wait(10)
-                        client.create_tweet(text=p)
+                        time.sleep(10)
+                        client.create_tweet(text=tweet)
                         continue
             elif post.index(p) < len(p):
                 time.sleep(20)
@@ -128,10 +135,10 @@ class Tweet:
                 query_params = {'query': f'from:{self.get_credentials()[6][1]}"{tweet_text}"','tweet.fields': 'author_id'}
                 tweet_id = self.get_tweet_id(query_params)["data"][0]["id"]
                 try:
-                    client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
+                    client.create_tweet(text=tweet,in_reply_to_tweet_id=tweet_id)
                 except:
-                    time.wait(10)
-                    client.create_tweet(text=p,in_reply_to_tweet_id=tweet_id)
+                    time.sleep(10)
+                    client.create_tweet(text=tweet,in_reply_to_tweet_id=tweet_id)
     
     
     def get_tweet_id(self, query):
@@ -278,15 +285,15 @@ def main():
     date = datetime.datetime.now()
 
 
-    if date.minute == 17:
+    if date.minute ==0:
         tweet.new_tweet(client,0)
-    elif date.hour == 12 and date.minute==0:
-       # tweet.get_anti_authoritarians(client)
-       exit(0)
+    #elif date.hour == 12 and date.minute==0:
+    #    tweet.get_anti_authoritarians(client)
+    #   exit(0)
     else:
         print("Let's go check those mentions")
-        #tweet.check_mentions(client)
-        tweet.get_anti_authoritarians(client)
+        tweet.check_mentions(client)
+      #  tweet.get_anti_authoritarians(client)
 
 
 if __name__ == "__main__":
