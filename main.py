@@ -225,7 +225,7 @@ class Tweet:
         pull_type = "anti-authoritarians"
         url = self.create_url(pull_type)
         params = self.get_params()
-        query_params = {'query': 'from: anarchistCC','tweet.fields': 'author_id','max_results':"15"}
+        query_params = {'query': 'from: MihaLogar','tweet.fields': 'author_id','max_results':"15"}
         #tweet_id = self.get_tweet_id(query_params)
         json_response = self.connect_to_endpoint(url, query_params)
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
@@ -233,10 +233,23 @@ class Tweet:
         for entry in json_object["data"]:
             #print(f"{entry['id']}: {entry['text']}")
             #if self.is_anarchist(entry):
-            print("We got a live one")
-            print(entry)
-            client.create_tweet(text="Go read the scary books, loser",in_reply_to_tweet_id=entry['id'])        
-            count+=1
+            date_posted = parser.isoparse(json_response['created_at'])
+            now = datetime.datetime.now(datetime.timezone.utc)
+            now = now.replace(tzinfo=None)
+            date_posted = datetime.datetime(date_posted.year,date_posted.month,date_posted.day,date_posted.hour,date_posted.minute,date_posted.second)
+        
+            #print (now,date_posted)
+        
+            time_diff = now - date_posted
+            minute_diff = time_diff.total_seconds()/60
+
+            
+            print(minute_diff)
+            if  minute_diff <= 5 and json_response['author_id'] not in bot_ids: 
+                print("We got a live one")
+                print(entry)
+                client.create_tweet(text="You're a fascist, Harry.",in_reply_to_tweet_id=entry['id'])        
+                count+=1
         #url = self.create_url(pull_type)
         #json_response = self.connect_to_endpoint(url, params)
         #json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
@@ -281,19 +294,19 @@ def main():
         access_token_secret=tweet.access_token_secret
     )                
     reply = False
-   # tweet.new_tweet(client)
+    #tweet.new_tweet(client,0)
     date = datetime.datetime.now()
 
 
-    if date.minute ==0:
-        tweet.new_tweet(client,0)
+    #if date.minute ==0:
+     #   tweet.new_tweet(client,0)
     #elif date.hour == 12 and date.minute==0:
     #    tweet.get_anti_authoritarians(client)
     #   exit(0)
-    else:
-        print("Let's go check those mentions")
-        tweet.check_mentions(client)
-      #  tweet.get_anti_authoritarians(client)
+  #  else:
+   #     print("Let's go check those mentions")
+       # tweet.check_mentions(client)
+    tweet.get_anti_authoritarians(client)
 
 
 if __name__ == "__main__":

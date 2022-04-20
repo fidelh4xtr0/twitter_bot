@@ -2,3 +2,6 @@ creds
 quotes.txt
 .vscode
 used
+bin/*
+lib/*
+pyvenv.cfg
