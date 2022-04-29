@@ -13,6 +13,7 @@ from dateutil import parser
 
 
 search_url = "https://api.twitter.com/2/tweets/search/recent"
+
 bot_ids = ['1434306349417082884',
            '1428910863231168517',
            '1458651028476375047',
@@ -68,19 +69,15 @@ class Tweet:
         
 
     def create_url(self,check_type):
-    # Replace with user ID below
         if check_type == "mentions":
             user_id = self.get_credentials()[5][1]
             return "https://api.twitter.com/2/users/{}/mentions".format(user_id)
-        elif check_type == "anti-authoritarians":
-            return "https://api.twitter.com/2/tweets/search/recent"
 
     #Tweet Preparation
 
 
     def connect_to_endpoint(self, url, params):
         response = requests.get(url, auth=self.bearer_oauth, params=params)
-        #print(response.status_code)
         if response.status_code != 200:
             raise Exception(response.status_code, response.text)
         return response.json()
@@ -133,7 +130,7 @@ class Tweet:
                     else:
                         tweet_text=tweet_text.split('"')[0]
                 query_params = {'query': f'from:{self.get_credentials()[6][1]}"{tweet_text}"','tweet.fields': 'author_id'}
-                tweet_id = self.get_tweet_id(query_params)["data"][0]["id"]
+                tweet_id = self.get_tweet_id(query_params)
                 try:
                     client.create_tweet(text=tweet,in_reply_to_tweet_id=tweet_id)
                 except:
@@ -144,7 +141,7 @@ class Tweet:
     def get_tweet_id(self, query):
         json_response = self.connect_to_endpoint(search_url, query)
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
-        return json_object
+        return json_object["data"][0]["id"]
 
     def debug(self,json_object):
         for entry in json_object['data']:
@@ -158,32 +155,21 @@ class Tweet:
     def check_mentions(self, client):
         global reply
         global option
-       # print(client.get_users_mentions(id="1489202597995200514"))
         option = 1
         pull_type = "mentions"
         url = self.create_url(pull_type)
         params = self.get_params()
         json_response = self.connect_to_endpoint(url, params)
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
-        #self.debug(json_object)
-
-        responses = len(json_object["data"])
-        #date_posted = json_object["data"]
-        #print(date_posted)
         for response in json_object["data"]:
             reply = True
             date_posted = parser.isoparse(response['created_at'])
             now = datetime.datetime.now(datetime.timezone.utc)
             now = now.replace(tzinfo=None)
-            date_posted = datetime.datetime(date_posted.year,date_posted.month,date_posted.day,date_posted.hour,date_posted.minute,date_posted.second)
-        
-            #print (now,date_posted)
-        
+            date_posted = datetime.datetime(date_posted.year,date_posted.month,date_posted.day,date_posted.hour,date_posted.minute,date_posted.second)        
             time_diff = now - date_posted
             minute_diff = time_diff.total_seconds()/60
 
-            
-            print(minute_diff)
             if  minute_diff <= 5 and response['author_id'] not in bot_ids:   
                 self.new_tweet(client,response['id'])
         
@@ -197,64 +183,7 @@ class Tweet:
         # possibly_sensitive, promoted_metrics, public_metrics, referenced_tweets,
         # source, text, and withheld
         return {"tweet.fields": "created_at,author_id"}
-    
-    
-    def is_anarchist(self,entry):
-        global option
-        option = 3
-        #print(entry['author_id'])
-        url = "https://api.twitter.com/2/users"
-        params = {"user.fields":"description", "ids":entry["author_id"]}
-        json_response = self.connect_to_endpoint(url, params)
-        json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
-        description = json_object["data"][0]['description'].lower()
-        if ("anti-authoritarian" in description or
-            "antiauthoritarian" in description or
-            "anarchist" in description or
-            "freedom" in description or
-            "libertarian socialist" in description):
-            return True
-        
             
-    def get_anti_authoritarians(self, client):
-        global reply
-        global option
-        
-        reply = True
-        option = 2
-        pull_type = "anti-authoritarians"
-        url = self.create_url(pull_type)
-        params = self.get_params()
-        query_params = {'query': 'from: MihaLogar','tweet.fields': 'author_id','max_results':"15"}
-        #tweet_id = self.get_tweet_id(query_params)
-        json_response = self.connect_to_endpoint(url, query_params)
-        json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
-        count = 1
-        for entry in json_object["data"]:
-            #print(f"{entry['id']}: {entry['text']}")
-            #if self.is_anarchist(entry):
-            date_posted = parser.isoparse(json_response['created_at'])
-            now = datetime.datetime.now(datetime.timezone.utc)
-            now = now.replace(tzinfo=None)
-            date_posted = datetime.datetime(date_posted.year,date_posted.month,date_posted.day,date_posted.hour,date_posted.minute,date_posted.second)
-        
-            #print (now,date_posted)
-        
-            time_diff = now - date_posted
-            minute_diff = time_diff.total_seconds()/60
-
-            
-            print(minute_diff)
-            if  minute_diff <= 5 and json_response['author_id'] not in bot_ids: 
-                print("We got a live one")
-                print(entry)
-                client.create_tweet(text="You're a fascist, Harry.",in_reply_to_tweet_id=entry['id'])        
-                count+=1
-        #url = self.create_url(pull_type)
-        #json_response = self.connect_to_endpoint(url, params)
-        #json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
-        #print(json_object)
-        
     def prevent_repeat(self, quote):
         dirname = os.path.dirname(__file__)
         filename = os.path.join(dirname, 'used')
@@ -278,7 +207,6 @@ def main():
     text = open(filename,'r')
     
     txt = text.read()
-    count=0
     for quote in txt.split('^'):
         if len(quote)<3:
             continue
@@ -294,19 +222,14 @@ def main():
         access_token_secret=tweet.access_token_secret
     )                
     reply = False
-    #tweet.new_tweet(client,0)
     date = datetime.datetime.now()
 
 
-    #if date.minute ==0:
-     #   tweet.new_tweet(client,0)
-    #elif date.hour == 12 and date.minute==0:
-    #    tweet.get_anti_authoritarians(client)
-    #   exit(0)
-  #  else:
-   #     print("Let's go check those mentions")
-       # tweet.check_mentions(client)
-    tweet.get_anti_authoritarians(client)
+    if date.minute ==0:
+        tweet.new_tweet(client,0)
+    else:
+        print("Let's go check those mentions")
+        tweet.check_mentions(client)
 
 
 if __name__ == "__main__":
