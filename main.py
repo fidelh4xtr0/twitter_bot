@@ -141,7 +141,7 @@ class Tweet:
     def get_tweet_id(self, query):
         json_response = self.connect_to_endpoint(search_url, query)
         json_object = json.loads(json.dumps(json_response, indent=4, sort_keys=True))
-        return json_object["data"][0]["id"]
+        return json_object
 
     def debug(self,json_object):
         for entry in json_object['data']:
